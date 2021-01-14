@@ -15,7 +15,12 @@
       v-for="item in menu.list"
       :key="item.menuId"
       :menu="item"
-      v-if="item.name != '参数管理' && item.name != '文件上传'"
+      v-if="
+        item.name != '参数管理' &&
+        item.name != '文件上传' &&
+        item.name != '报警规则测试表' &&
+        item.name != '系统日志'
+      "
       :dynamicMenuRoutes="dynamicMenuRoutes"
     >
     </sub-menu>

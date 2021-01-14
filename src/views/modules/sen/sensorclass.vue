@@ -124,7 +124,7 @@
       <el-form-item>
         <el-input
           v-model="dataForm.key"
-          placeholder="传感器类名"
+          placeholder="根据传感器类id查询"
           clearable
           style="font-size: 18px"
         ></el-input>
@@ -269,7 +269,6 @@ import AddOrUpdate from './sensorclass-add-or-update'
 export default {
   data () {
     return {
-      tmpList: [],
       loading2: true,
       sumData: [],
       gridData: [
@@ -327,12 +326,16 @@ export default {
         this.getDataList()
       }
       else {
-        for (var i = 0; i < this.tmpList.length; i++) {
-          if (this.dataForm.key == this.tmpList[i]['sensorClassType']) {
-            data.push(this.tmpList[i])
+        this.$http({
+          url: this.$http.adornUrl(`/sen/sensorclass/info/${this.dataForm.key}`),
+          method: 'get',
+        }).then(({ data }) => {
+          if (data && data.code === 0) {
+            this.dataList = [data.sensorClass]
+
           }
-        }
-        this.dataList = data
+
+        })
       }
 
 

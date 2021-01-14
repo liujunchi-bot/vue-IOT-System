@@ -232,19 +232,20 @@ export default {
       console.log('pieCharts')
       console.log(pieCharts.length)
       console.log(this.mychartData)
-      if (pieCharts.length == 0) {
-        this.updateData()
-      }
+      // if (pieCharts.length == 0) {
+      //   this.updateData()
+      // }
       for (var i = 0; i < pieCharts.length; i++) {
         var myChart = this.$echarts.init(pieCharts[i]);
         // 指定图表的配置项和数据
         let mapTitle = {}
         mapTitle = this.mychartData[i]['senAttribute'][0]
         let mapData = []
-        for (var j = 0; j < this.mychartData[i]['senTodayData'].length; j++) {
-          mapData.push([this.mychartData[i]['senTodayData'][j]['date'], this.mychartData[i]['senTodayData'][j]['data']])
+        // for (var j = 0; j < this.mychartData[i]['senTodayData'].length; j++) {
+        //   mapData.push([this.mychartData[i]['senTodayData'][j]['date'], this.mychartData[i]['senTodayData'][j]['data']])
 
-        }
+        // }
+        mapData = this.mychartData[i]['senTodayData']
         console.log(mapTitle)
         console.log(mapData)
         const option = {

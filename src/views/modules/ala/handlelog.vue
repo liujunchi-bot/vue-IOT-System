@@ -10,7 +10,7 @@
         <el-input
           style="font-size: 18px"
           v-model="dataForm.key"
-          placeholder="处置人"
+          placeholder="处置事件id"
           clearable
         ></el-input>
       </el-form-item>
@@ -172,7 +172,7 @@ export default {
     this.getDataList()
   },
   methods: {
-    earchKey () {
+    searchKey () {
       console.log('search')
       this.dataListLoading = true
       let data = []
@@ -180,12 +180,17 @@ export default {
         this.getDataList()
       }
       else {
-        for (var i = 0; i < this.tmpList.length; i++) {
-          if (this.dataForm.key == this.tmpList[i]['handlePerson']) {
-            data.push(this.tmpList[i])
+        this.$http({
+          url: this.$http.adornUrl(`/ala/handlelog/info/${this.dataForm.key}`),
+          method: 'get',
+        }).then(({ data }) => {
+          if (data && data.code === 0) {
+            console.log(data)
+            this.dataList = [data.handleLog]
+
           }
-        }
-        this.dataList = data
+          this.dataListLoading = false
+        })
       }
 
 

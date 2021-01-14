@@ -191,7 +191,7 @@ export default {
     };
   },
   activated () {
-    if (myChart) {
+    if (this.myChart) {
       this.myChart.resize()
     }
   },
@@ -453,14 +453,11 @@ export default {
           console.log('data')
           console.log(data)
           this.dataTitle = data.senAttribute[0]
-          let array = []
-          array = data.senOneHourData
-          console.log(data.senOneHourData)
-          console.log(array)
-          console.log(array.length)
-          for (var i = 0; i < array.length; i++) {
-            this.t.push([array[i]['date'], array[i]['sensorData']])
-          }
+
+          // for (var i = 0; i < array.length; i++) {
+          //   this.t.push([array[i]['date'], array[i]['sensorData']])
+          // }
+          this.t = data.senOneHourData
           console.log(this.dataTitle)
           console.log('tttttt')
           console.log(this.t)

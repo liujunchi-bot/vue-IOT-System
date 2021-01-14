@@ -10,7 +10,7 @@
         <el-input
           style="font-size: 18px"
           v-model="dataForm.key"
-          placeholder="报警规则id"
+          placeholder="报警日志id"
           clearable
         ></el-input>
       </el-form-item>
@@ -18,7 +18,7 @@
         <el-button round type="info" style="font-size: 18px" @click="searchKey"
           >查询</el-button
         >
-        <el-button
+        <!-- <el-button
           round
           style="font-size: 18px"
           v-if="isAuth('ala:alarmlog:save')"
@@ -34,7 +34,7 @@
           @click="deleteHandle()"
           :disabled="dataListSelections.length <= 0"
           >批量删除</el-button
-        >
+        > -->
       </el-form-item>
     </el-form>
     <el-table
@@ -53,15 +53,14 @@
       :data="dataList"
       border
       v-loading="dataListLoading"
-      @selection-change="selectionChangeHandle"
     >
-      <el-table-column
+      <!-- <el-table-column
         type="selection"
         header-align="center"
         align="center"
         width="50"
       >
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
         prop="logId"
         header-align="center"
@@ -83,26 +82,7 @@
         label="报警数据"
       >
       </el-table-column>
-      <el-table-column
-        prop="sensor_longitude"
-        header-align="center"
-        align="center"
-        label="经度"
-      ></el-table-column>
-      <el-table-column
-        prop="sensor_latitude"
-        header-align="center"
-        align="center"
-        label="纬度"
-      >
-      </el-table-column>
-      <el-table-column
-        prop="sensor_location_describe"
-        header-align="center"
-        align="center"
-        label="位置描述"
-      >
-      </el-table-column>
+
       <el-table-column
         prop="alarmTime"
         header-align="center"
@@ -110,7 +90,7 @@
         label="报警时间"
       >
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         prop="handled"
         header-align="center"
         align="center"
@@ -123,8 +103,8 @@
         align="center"
         label="处理日志id"
       >
-      </el-table-column>
-      <el-table-column
+      </el-table-column> -->
+      <!-- <el-table-column
         fixed="right"
         header-align="center"
         align="center"
@@ -145,7 +125,7 @@
             >删除</el-button
           >
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
     <el-pagination
       @size-change="sizeChangeHandle"
@@ -199,12 +179,16 @@ export default {
         this.getDataList()
       }
       else {
-        for (var i = 0; i < this.tmpList.length; i++) {
-          if (this.dataForm.key == this.tmpList[i]['alarmRuleId']) {
-            data.push(this.tmpList[i])
+        this.$http({
+          url: this.$http.adornUrl(`/ala/alarmlog/info/${this.dataForm.key}`),
+          method: 'get',
+        }).then(({ data }) => {
+          if (data && data.code === 0) {
+            this.dataList = [data.alarmLog]
+
           }
-        }
-        this.dataList = data
+          this.dataListLoading = false
+        })
       }
 
 

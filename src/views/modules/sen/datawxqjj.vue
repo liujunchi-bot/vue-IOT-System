@@ -10,7 +10,8 @@
         <el-input
           style="font-size: 18px"
           v-model="dataForm.key"
-          placeholder="参数名"
+          placeholder="数据id
+          "
           clearable
         ></el-input>
       </el-form-item>

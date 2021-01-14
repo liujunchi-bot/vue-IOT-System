@@ -117,7 +117,7 @@
         <el-input
           style="font-size: 18px; width: 300px"
           v-model="dataForm.key"
-          placeholder="id/厂商/通信方式/终端状态"
+          placeholder="设备id"
           clearable
         ></el-input>
       </el-form-item>

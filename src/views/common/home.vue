@@ -31,16 +31,17 @@
       </el-radio-group> -->
 
       <el-row :gutter="20">
-        <el-col :span="10">
-          <el-card style="width: 700px; height: 460px">
+        <el-col :span="12">
+          <el-card style="width: 700px; height: 550px">
             <el-radio-group v-model="radio" @change="changeHandler">
-              <el-radio-button label="0">本周</el-radio-button>
+              <el-radio-button label="0">昨天</el-radio-button>
               <!-- <el-radio-button label="1">本月</el-radio-button> -->
               <el-radio-button label="1">今天</el-radio-button>
-              <el-radio-button label="2">昨天</el-radio-button>
+              <el-radio-button label="2">本周</el-radio-button>
             </el-radio-group>
             <div
-              id="J_chartBarBox"
+              id="J_chartLineBoxYestoday"
+              style="padding-top: 80px; width: 600px; height: 390px"
               class="chart-box"
               v-show="dataFlag[0]"
             ></div>
@@ -52,18 +53,20 @@
             <div
               id="J_chartLineBoxToday"
               class="chart-box"
+              style="padding-top: 80px; width: 600px; height: 390px"
               v-show="dataFlag[1]"
             ></div>
             <div
-              id="J_chartLineBoxYestoday"
+              id="J_chartBarBox"
+              style="padding-top: 80px; width: 600px; height: 390px"
               class="chart-box"
               v-show="dataFlag[2]"
             ></div>
           </el-card>
         </el-col>
-        <el-col :span="2"> </el-col>
+        <el-col :span="1"> </el-col>
 
-        <el-col :span="10" style="paddding-top: 100px">
+        <el-col :span="11" style="paddding-top: 100px">
           <el-card>
             <div slot="header">
               <el-radio-group v-model="radio1" @change="changeWarning">
@@ -73,12 +76,12 @@
             </div>
             <div
               id="J_chartLineWeekWarning"
-              style="width: 500px; height: 350px"
+              style="width: 530px; height: 390px"
               v-show="dataVis[0]"
             ></div>
             <div
               id="J_chartLineMonthWarning"
-              style="width: 500px; height: 350px"
+              style="width: 530px; height: 390px"
               v-show="!dataVis[0]"
             ></div>
           </el-card>
@@ -108,13 +111,14 @@ export default {
 
   data () {
     return {
+      // timer: '',
       dataVisible: true,
       dataVis: [true],
       titleItem: [
         {
           title: "传感器类别",
           number: {
-            number: [120],
+            number: [6],
             // toFixed: 1,
             content: "{nt}"
           }
@@ -176,8 +180,12 @@ export default {
         lastWeekDataSenList: [],              //过去一周传感器增加的数量
         todayDataSenList: [],                //今天传感器增加的数量
         lastWeekDataTermList: [],             //过去一周终端增加的数量
-        todayDataTermList: []                 //今天终端设备增加的数量
-      }
+        todayDataTermList: [],                 //今天终端设备增加的数量
+        warningDate: [],                           //设备报警一周的时间
+        senDate: [],
+        warningMonth: []
+      },
+      count: '',
     }
   },
   updated () {
@@ -197,13 +205,19 @@ export default {
     this.querytodayDataTermList()
     this.querylastWeekDataSenList()
     this.querylastWeekDataTermList()
-    // this.initChartLineWeekWarning()
+    this.initChartLineWeekWarning()
     console.log('mounted')
     // for (var i = 0; i < 4; i++) {
     this.$set(this.dataFlag, 0, true)
-    this.initChartBar()
+    this.initChartLineYestoday()
     this.$set(this.dataVis, 0, true)
     this.initChartLineWeekWarning()
+
+
+    this.warningLog()
+    this.timer = setInterval(this.warningLog, 20000)
+
+
     // this.dataVisible = false
     // this.$nextTick(() => {
     //   ld.close()
@@ -228,6 +242,9 @@ export default {
     // }
 
 
+  },
+  destroyed () {
+    clearInterval(this.timer);
   },
   activated () {
     // 由于给echart添加了resize事件, 在组件激活时需要重新resize绘画一次, 否则出现空白bug
@@ -255,11 +272,36 @@ export default {
     if (this.chartLine5) {
       this.chartLine5.resize()
     }
-    this.initChartBar()
+    this.initChartLineYestoday()
     this.initChartLineWeekWarning()
     this.initChartLineWeekWarning()
   },
   methods: {
+    warningLog () {
+      this.$http({
+        url: this.$http.adornUrl(`/ala/alarmlog/count`),
+        method: 'get',
+
+      }).then(({ data }) => {
+        if (data && data.code === 0) {
+          console.log('报警通知')
+          console.log(data)
+          if (this.count == '') {
+            this.count = data.num
+          }
+          else {
+            if (data.num != this.count) {
+              this.count = data.num
+              this.$notify({
+                title: '新的报警信息',
+                message: '亲！请及时处理新的报警通知哦！',
+                type: 'warning'
+              });
+            }
+          }
+        }
+      })
+    },
     changeWarning (value) {
       this.$set(this.dataVis, 0, !this.dataVis[0])
       this.initChartLineWeekWarning()
@@ -313,7 +355,8 @@ export default {
         if (data && data.code === 0) {
           console.log(data)
           // alert('加载成功')
-          this.$set(this.dataList, 'lastWeekDataSenList', data.lastWeekDataSenList)
+          this.$set(this.dataList, 'lastWeekDataSenList', data.lastWeekDataNumList)
+          this.$set(this.dataList, 'senDate', data.lastWeekDate)
           console.log('sucess1')
         }
       })
@@ -327,7 +370,7 @@ export default {
           console.log(data)
           // alert('加载成功')
           this.$set(this.dataList, 'monthDayNumList', data.monthNumList)
-
+          this.$set(this.dataList, 'warningMonth', data.dayList)
           // this.dataList.monthDayNumList = data.monthDayNumList
           console.log('data.monthDayNumList:   ' + this.dataList['monthDayNumList'])
           console.log('sucess1')
@@ -335,11 +378,13 @@ export default {
       })
     },
     querySumData () {
+
       this.$http({
         url: this.$http.adornUrl('/sen/sensor/firstpage'),
         method: 'get',
       }).then(({ data }) => {
         if (data && data.code === 0) {
+          console.log('querySumData')
           console.log(data)
           // alert('加载成功')
           this.$set(this.titleItem[0], 'number', { number: [data.sensorClassNum], content: "{nt}" })
@@ -350,6 +395,18 @@ export default {
           this.$set(this.dataList, 'sensorYesNumList', data.sensorYesNumList)
           this.$set(this.dataList, 'terminalYesNumList', data.terminalYesNumList)
           this.$set(this.dataList, 'lastWeekNumList', data.lastWeekNumList)
+          // let date = []
+          // date = data.lastWeekDate
+          // for (var i = 0; i < date.length; i++) {
+          //   date[i] = date[i] | formatDate
+
+          // }
+          this.$set(this.dataList, 'warningDate', data.lastWeekDate)
+          console.log('date')
+          // console.log(date)
+          console.log(this.dataList['warningDate'])
+          this.initChartLineWeekWarning()
+          this.initChartLineYestoday()
           console.log('sucess1')
         }
       })
@@ -431,7 +488,7 @@ export default {
       this.$set(this.dataFlag, value, true)
       if (value == 0) {
 
-        this.initChartBar()
+        this.initChartLineYestoday()
       }
       // else if (value == 1) {
       //   this.initChartLineMonth()
@@ -440,7 +497,7 @@ export default {
         this.initChartLineToday()
       }
       else {
-        this.initChartLineYestoday()
+        this.initChartBar()
       }
       for (var i = 0; i < 3; i++) {
         console.log('test: ' + this.dataFlag[i])
@@ -532,7 +589,7 @@ export default {
         'xAxis': {
           'type': 'category',
           'boundaryGap': false,
-          'data': ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+          'data': this.dataList['warningDate']
         },
         'yAxis': {
           'type': 'value'
@@ -577,7 +634,7 @@ export default {
         'xAxis': {
           'type': 'category',
           'boundaryGap': false,
-          'data': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+          'data': this.dataList['warningMonth']
         },
         'yAxis': {
           'type': 'value'
@@ -625,7 +682,7 @@ export default {
         'xAxis': {
           'type': 'category',
           'boundaryGap': false,
-          'data': ['0', '2', '4', '6', '8', '10', '12', '14', '16', '18', '20', '22']
+          'data': ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24']
         },
         'yAxis': {
           'type': 'value'
@@ -678,7 +735,7 @@ export default {
         'xAxis': {
           'type': 'category',
           'boundaryGap': false,
-          'data': ['0', '2', '4', '6', '8', '10', '12', '14', '16', '18', '20', '22']
+          'data': ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24']
         },
         'yAxis': {
           'type': 'value'
@@ -729,7 +786,7 @@ export default {
         xAxis: [
           {
             type: 'category',
-            data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+            data: this.dataList['senDate'],
             name: '时间段'
           }
         ],
@@ -764,6 +821,23 @@ export default {
 
 
   },
+  filters: {
+    formatDate: function (value) {
+      let date = new Date(value);
+      let y = date.getFullYear();
+      let MM = date.getMonth() + 1;
+      MM = MM < 10 ? ('0' + MM) : MM;
+      let d = date.getDate();
+      d = d < 10 ? ('0' + d) : d;
+      let h = date.getHours();
+      h = h < 10 ? ('0' + h) : h;
+      let m = date.getMinutes();
+      m = m < 10 ? ('0' + m) : m;
+      let s = date.getSeconds();
+      s = s < 10 ? ('0' + s) : s;
+      return y + '-' + MM + '-' + d + ' ' + h + ':' + m + ':' + s;
+    }
+  }
 
 }
 </script>

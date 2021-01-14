@@ -9,17 +9,13 @@
       <el-form-item>
         <el-input
           v-model="dataForm.key"
-          placeholder="参数名"
+          placeholder="id"
           clearable
           style="font-size: 18px"
         ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button
-          round
-          type="info"
-          style="font-size: 18px"
-          @click="getDataList()"
+        <el-button round type="info" style="font-size: 18px" @click="searchKey"
           >查询</el-button
         >
         <el-button
@@ -179,6 +175,29 @@ export default {
     this.getDataList()
   },
   methods: {
+    searchKey () {
+      console.log('search')
+      this.dataListLoading = true
+      let data = []
+      if (this.dataForm.key == '') {
+        this.getDataList()
+      }
+      else {
+        this.$http({
+          url: this.$http.adornUrl(`/api/attribute/info/${this.dataForm.key}`),
+          method: 'get',
+        }).then(({ data }) => {
+          if (data && data.code === 0) {
+            this.dataList = [data.attribute]
+
+          }
+          this.dataListLoading = false
+        })
+      }
+
+
+      this.dataListLoading = false
+    },
     // 获取数据列表
     getDataList () {
       this.dataListLoading = true

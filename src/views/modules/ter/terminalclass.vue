@@ -112,7 +112,7 @@
         <el-input
           style="font-size: 18px"
           v-model="dataForm.key"
-          placeholder="终端id/终端类名"
+          placeholder="终端类id"
           clearable
         ></el-input>
       </el-form-item>

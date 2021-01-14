@@ -10,7 +10,7 @@
         <el-input
           style="font-size: 18px"
           v-model="dataForm.key"
-          placeholder="传感器id"
+          placeholder="数据id"
           clearable
         ></el-input>
       </el-form-item>
@@ -137,7 +137,6 @@ import AddOrUpdate from './datadlcxy-add-or-update'
 export default {
   data () {
     return {
-      tmpList: [],
       dataForm: {
         key: ''
       },
@@ -165,12 +164,16 @@ export default {
         this.getDataList()
       }
       else {
-        for (var i = 0; i < this.tmpList.length; i++) {
-          if (this.dataForm.key == this.tmpList[i]['sensorId']) {
-            data.push(this.tmpList[i])
+        this.$http({
+          url: this.$http.adornUrl(`/sen/datadlcxy/info/${this.dataForm.key}`),
+          method: 'get',
+        }).then(({ data }) => {
+          if (data && data.code === 0) {
+            this.dataList = [data.dataDlcxy]
+
           }
-        }
-        this.dataList = data
+          this.dataListLoading = false
+        })
       }
 
 

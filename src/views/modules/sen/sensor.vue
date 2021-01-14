@@ -9,7 +9,7 @@
       <el-form-item>
         <el-input
           v-model="dataForm.key"
-          placeholder="id/类id/厂商/通信方式"
+          placeholder="请输入传感器id"
           clearable
           style="font-size: 18px; width: 300px"
         ></el-input>
@@ -255,12 +255,16 @@ export default {
         this.getDataList()
       }
       else {
-        for (var i = 0; i < this.tmpList.length; i++) {
-          if (this.dataForm.key == this.tmpList[i]['sensorId'] || this.dataForm.key == this.tmpList[i]['sensorCommit'] || this.dataForm.key == this.tmpList[i]['sensorCompany'] || this.dataForm.key == this.tmpList[i]['sensorClassId']) {
-            data.push(this.tmpList[i])
+        this.$http({
+          url: this.$http.adornUrl(`/sen/sensor/info/${this.dataForm.key}`),
+          method: 'get',
+        }).then(({ data }) => {
+          if (data && data.code === 0) {
+            this.dataList = [data.sensor]
+
           }
-        }
-        this.dataList = data
+          this.dataListLoading = false
+        })
       }
 
 
@@ -280,7 +284,6 @@ export default {
       }).then(({ data }) => {
         if (data && data.code === 0) {
           this.dataList = data.page.list
-          this.tmpList = this.dataList
           this.totalPage = data.page.totalCount
         } else {
           this.dataList = []
